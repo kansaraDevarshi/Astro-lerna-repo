@@ -1,0 +1,41 @@
+---
+import Footer from '@components/Footer.astro';
+import { getSession } from 'auth-astro/server';
+
+const session  = await getSession(Astro.request);
+---
+	<head>
+		{
+			session ? (
+				<p>Welcome {sessionStorage.user.name}</p>
+			) : (
+      <p>Not logged in</p>
+    )
+		}
+	</head>
+	<body>
+
+		<main>
+			<h1>🧑‍🚀 Hello, Astronaut!</h1>
+
+			<button id="login">Login</button>
+  			<button id="logout">Logout</button>
+		
+			  <script>
+				const { signIn, signOut } = await import("auth-astro/client")
+			
+				const loginButton = document.querySelector("#login") as HTMLButtonElement | null;
+				const logoutButton = document.querySelector("#logout") as HTMLButtonElement | null;
+			
+				if (loginButton) {
+				  loginButton.onclick = () => signIn("google");
+				}
+			
+				if (logoutButton) {
+				  logoutButton.onclick = () => signOut();
+				}
+			  </script>
+		</main>
+		<Footer />
+	</body>
+</html>

@@ -1,0 +1,16 @@
+---
+import { signIn } from 'auth-astro';
+import Google from '@auth/core/providers/google';
+---
+
+<script>
+async function handleLogin() {
+    try {
+      await signIn(Google);
+      window.location.href = '/about';
+    } catch (error) {
+      console.error('Login error:', error);
+    }
+  }
+  
+</script>
