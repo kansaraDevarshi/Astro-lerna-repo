@@ -1,0 +1,25 @@
+---
+import client from '../lib/apollo-client';
+import Layout from '../layout/Layout.astro';
+import { QUERY_TODO_LIST } from '../service/todos';
+import { getSession } from 'auth-astro/server';
+import DisplayData from '../components/DisplayData';
+
+const session = await getSession(Astro.request);
+
+const {
+  data: { getUserTodo: todos },
+} = await client.query({
+  query: QUERY_TODO_LIST,
+  variables: { userId: session?.user?.email ?? '' },
+});
+
+const userId = session?.user?.email ?? '';
+
+console.log('data', todos, userId);
+---
+
+<Layout title='Dashboard'>
+  <h1>User's Todos list</h1>
+  <DisplayData lists={todos} userId={userId} />
+</Layout>

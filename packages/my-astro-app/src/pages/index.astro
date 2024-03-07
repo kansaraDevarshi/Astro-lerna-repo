@@ -1,41 +1,109 @@
 ---
-import Footer from '@components/Footer.astro';
-import { getSession } from 'auth-astro/server';
+import { getSession } from "auth-astro/server";
+import Layout from "../layout/Layout.astro";
 
-const session  = await getSession(Astro.request);
+const session = await getSession(Astro.request);
+console.log('session>>>>>>>>>>.', JSON.stringify(session));
+const isAuthenticated = session && session.user;
+
+Astro.cookies.set("session", JSON.stringify(session));
+
+
+// Function to handle logout
 ---
-	<head>
-		{
-			session ? (
-				<p>Welcome {sessionStorage.user.name}</p>
-			) : (
-      <p>Not logged in</p>
-    )
-		}
-	</head>
-	<body>
 
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
+<Layout title="Signin/Signup">
+  <main>
+    <h1>
+      {
+        isAuthenticated
+          ? `Hi ${session?.user?.name ?? ""}`
+          : "You are not logged in !"
+      }
+    </h1>
 
-			<button id="login">Login</button>
-  			<button id="logout">Logout</button>
-		
-			  <script>
-				const { signIn, signOut } = await import("auth-astro/client")
-			
-				const loginButton = document.querySelector("#login") as HTMLButtonElement | null;
-				const logoutButton = document.querySelector("#logout") as HTMLButtonElement | null;
-			
-				if (loginButton) {
-				  loginButton.onclick = () => signIn("google");
-				}
-			
-				if (logoutButton) {
-				  logoutButton.onclick = () => signOut();
-				}
-			  </script>
-		</main>
-		<Footer />
-	</body>
-</html>
+    {
+      !isAuthenticated ? (
+        <>
+          <button id="login">Login With Github</button>
+          <button id="login-with-google">Login With Google</button>
+        </>
+      ) : (
+        <>
+          <h2>
+            Go to <a href="/dashboard/">dashboard</a>
+          </h2>
+          <button id="logout">Logout</button>
+        </>
+      )
+    }
+
+    <script>
+      const { signIn, signOut } = await import("auth-astro/client");
+      if (typeof sessionStorage !== "undefined") {
+        const loginButton = document.querySelector(
+          "#login-with-google",
+        ) as HTMLButtonElement | null;
+        const loginGitButton = document.querySelector(
+          "#login",
+        ) as HTMLButtonElement | null;
+        const logoutButton = document.querySelector(
+          "#logout",
+        ) as HTMLButtonElement | null;
+
+        if (loginButton && loginGitButton) {
+          loginButton.onclick = () => signIn("google");
+          loginGitButton.onclick = () => signIn("github");
+        }
+
+        if (logoutButton) {
+          logoutButton.onclick = () => {
+            signOut();
+            function handleLogout() {
+              // Remove session token cookie
+              document.cookie =
+                "sessionToken=; expires=tuesday, 05 March 2024 00:00:00 UTC; path=/;";
+              // Redirect or perform other logout actions as needed
+              console.log("Logged out");
+            }
+            // Call handleLogout function to clear client-side session
+            handleLogout();
+          };
+        }
+
+        // console.log('Cookies session client side ::  ', Astro.cookies.get('session'));
+
+        // Log the value of document.cookie
+        console.log(document.cookie);
+
+        // Check if session token cookie exists
+        // Function to check if a specific cookie exists
+        function checkCookie(cookieName: string) {
+          return document.cookie.split(";").some((cookie) => {
+            return cookie.trim().startsWith(`${cookieName}=`);
+          });
+        }
+        const sessionTokenExists = checkCookie("session");
+        console.log("Session token cookie exists:", sessionTokenExists);
+
+        // Get value of session token cookie
+        function getCookieValue(cookieName: string) {
+          const cookie = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith(`${cookieName}=`));
+
+          if (cookie) {
+            return cookie.split("=")[1];
+          }
+
+          return null;
+        }
+        const sessionTokenValue = getCookieValue("session");
+        if (sessionTokenValue) {
+          console.log(sessionTokenValue);
+          console.log("Session token cookie value:", JSON.parse(decodeURIComponent(sessionTokenValue)));
+        }
+      }
+    </script>
+  </main>
+</Layout>
