@@ -1,39 +1,38 @@
-import { gql } from "@apollo/client/core";
+import { gql } from '@apollo/client';
 
-// Query to fetch todo list for a single user
-const QUERY_TODO_LIST = gql`
-  query getSingleUser($userId: String!) {
-    getUserTodo(userId: $userId) {
-      status
+const QUERY_ALL_TODO_LIST = gql`
+  query GetTodoList {
+    allTodoList {
+      userId
+      id
       title
+      status
     }
   }
 `;
 
-// Mutation to add a todo
+const QUERY_TODO_LIST = gql`
+  query getSingleUser($userId: String!) {
+    getUserTodo(userId: $userId) {
+      id
+      title
+      status
+    }
+  }
+`;
+
 const ADD_TODO = gql`
   mutation AddTodo($userId: String!, $title: String!, $status: String!) {
     addTodo(userId: $userId, title: $title, status: $status) {
       id
-      status
       title
+      status
     }
   }
 `;
 
-// Mutation to update a todo
-const UPDATE_TODO = gql`
-  mutation UpdateTodoList($input: UpdateTodoList!) {
-    updateTodoList(input: $input) {
-      id
-      status
-      title
-      userId
-    }
-  }
-`;
 export {
+  QUERY_ALL_TODO_LIST,
   QUERY_TODO_LIST,
   ADD_TODO,
-  UPDATE_TODO,
 };
